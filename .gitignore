@@ -50,3 +50,7 @@ app.*.map.json
 /android/app/release
 e2e/node_modules/
 e2e/shots/
+
+# CI が flutter create --platforms=web で都度生成する
+/web/
+e2e/package-lock.json
