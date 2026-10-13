@@ -1,0 +1,6 @@
+{"itemId": "ip-trv-route", "examId": "it_passport", "category": "travel", "label": "試験会場(テストセンター)までの経路と所要時間を確かめた", "venue": "venue"}
+{"itemId": "ip-trv-time", "examId": "it_passport", "category": "travel", "label": "開始時刻と、余裕をもった到着時間を確かめた", "venue": "venue"}
+{"itemId": "ip-adm-ticket", "examId": "it_passport", "category": "admission", "label": "受験の予約内容(日時・会場)を確認できる画面や案内を用意した", "venue": "venue"}
+{"itemId": "ip-adm-id", "examId": "it_passport", "category": "admission", "label": "本人確認書類の種類と必要なものを確かめた", "venue": "venue"}
+{"itemId": "ip-bel-allowed", "examId": "it_passport", "category": "belongings", "label": "持ち込んでよい物・いけない物を確かめた", "venue": "venue"}
+{"itemId": "ip-bel-calc", "examId": "it_passport", "category": "belongings", "label": "計算用の筆記用具・メモの扱いを会場の案内で確かめた", "venue": "venue"}

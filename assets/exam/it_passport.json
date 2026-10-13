@@ -1,0 +1,40 @@
+{
+  "examId": "it_passport",
+  "name": "ITパスポート試験",
+  "audience": "adult",
+  "subjects": [
+    {
+      "subjectId": "strategy",
+      "name": "ストラテジ系",
+      "order": 1
+    },
+    {
+      "subjectId": "management",
+      "name": "マネジメント系",
+      "order": 2
+    },
+    {
+      "subjectId": "technology",
+      "name": "テクノロジ系",
+      "order": 3
+    }
+  ],
+  "levels": [
+    {
+      "levelId": "standard",
+      "name": "ITパスポート",
+      "questionCount": 100,
+      "timeLimitSec": 7200,
+      "passRule": {
+        "totalPct": 60,
+        "subjectMinPct": 30
+      },
+      "subjectQuestionCounts": {
+        "strategy": 35,
+        "management": 20,
+        "technology": 45
+      }
+    }
+  ],
+  "examDates": []
+}
