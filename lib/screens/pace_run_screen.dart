@@ -107,7 +107,7 @@ class _PaceRunScreenState extends State<PaceRunScreen> {
             Text('100問ペース走', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
-              '本番は120分で100問（1問あたり約72秒）。'
+              '現行試験は120分で100問（1問あたり約72秒）。新制度の値は未公表のため目安です。'
               'その感覚を${config.questionCount}問・${config.timeLimitSec ~/ 60}分の短縮版で体感します。'
               '答えの正誤は最後にまとめて採点します。ペースと見直し候補（旗）も練習できます。',
               textAlign: TextAlign.center,

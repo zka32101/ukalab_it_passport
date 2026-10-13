@@ -242,8 +242,9 @@ class _MockExamScreenState extends ConsumerState<MockExamScreen> {
               Text('模擬試験', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Text(
-                '本試験は${level.questionCount}問・${(level.timeLimitSec ?? 0) ~/ 60}分。'
-                '合格基準は非公開のため、正答率70%を目安に表示します。',
+                'このアプリは2027年度開始予定の新制度（シラバス案 Ver.0.1）向けです。'
+                '新制度の出題数・時間・合格基準は未公表のため、${level.questionCount}問・${(level.timeLimitSec ?? 0) ~/ 60}分は現行試験の値を目安にしています。'
+                '合格の目安は正答率70%で表示します。',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
