@@ -1,0 +1,217 @@
+import 'dart:async' show unawaited;
+import 'dart:io' show Platform;
+
+import 'package:app_common_kit/app_common_kit.dart' hide SettingsScreen;
+import 'package:ukalab_core/ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:ukalab_core/cross_promo.dart' show UkalabCrossPromo;
+import 'package:ukalab_core/daily_goal.dart';
+import 'package:ukalab_core/achievements.dart'
+    show achievementUnlockOverrides, dailyGoalAchievementsOverride, watchAchievementUnlocks;
+import 'package:ukalab_core/reminder.dart' show reminderOverrides;
+import 'package:ukalab_core/reminder_notification.dart'
+    show ReminderNotificationWatcher, reminderNotifierProvider;
+import 'package:ukalab_core/exam_date.dart';
+import 'package:ukalab_core/mock_exam_history.dart';
+import 'data/exam_repository.dart';
+import 'screens/home_screen.dart';
+import 'screens/learn_screen.dart';
+import 'screens/mock_exam_screen.dart';
+import 'screens/record_screen.dart';
+import 'screens/settings_screen.dart';
+import 'services/local_reminder_notifier.dart';
+import 'services/no_ads_backend.dart';
+
+/// Google公式のテスト広告ユニットID。本番公開前に実際のIDへ差し替える（決定35）。
+AdUnitIds _adUnitIds() => kIsWeb
+    // Web には広告SDKが無く、広告は出さない（NoAdsBackend）。リリースビルドでテストIDを
+    // 使うと AdGate が例外にするため、Web では空のIDにする。
+    ? const AdUnitIds(banner: '', interstitial: '', rewarded: '')
+    : Platform.isIOS
+    ? const AdUnitIds(
+        banner: 'ca-app-pub-3940256099942544/2934735716',
+        interstitial: 'ca-app-pub-3940256099942544/4411468910',
+        rewarded: 'ca-app-pub-3940256099942544/1712485313',
+      )
+    // Android: 本番の広告ユニットは未発行のため、全ビルドでテスト広告。公開前に実IDへ差し替える。
+    : const AdUnitIds(
+        banner: 'ca-app-pub-3940256099942544/6300978111',
+        interstitial: 'ca-app-pub-3940256099942544/1033173712',
+        rewarded: 'ca-app-pub-3940256099942544/5224354917',
+      );
+
+/// RevenueCat の公開SDKキー（Google Play 用）。ビルド時に
+/// `--dart-define=RC_GOOGLE_KEY=goog_...` で渡す。コミットしない。
+/// 未指定（空）の間は、これまでどおり仮の購入サービス（FakeEntitlementService）で動く。
+const _rcGoogleKey = String.fromEnvironment('RC_GOOGLE_KEY');
+bool get _useRevenueCat => !kIsWeb && Platform.isAndroid && _rcGoogleKey.isNotEmpty;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 同梱フォントのライセンス（SIL OFL 1.1）を、設定のライセンス表示へ載せる。
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(
+      ['BIZ UDPGothic'],
+      await rootBundle.loadString('assets/fonts/OFL.txt'),
+    );
+  });
+
+  // 相互紹介（Firebase 初期化と Remote Config 取得）。失敗しても起動を止めない（core 側で握りつぶす）。
+  unawaited(UkalabCrossPromo.init());
+
+  // 学習コイン・衣装（app_common_kit）。財布・衣装台帳はアプリごとに端末内保存
+  // （決定67〜77）。ショップには通常衣装（ITパスポート、コイン購入）だけを並べる。
+  final coinService = CoinService(
+    store: SharedPreferencesCoinStore('it_passport'),
+    shop: OutfitCatalog.shopItems([UkalabCert.itPassport]),
+  );
+  await coinService.load();
+
+  final outfitService = OutfitService(store: SharedPreferencesOutfitStore('it_passport'));
+  await outfitService.load();
+
+  // 課金。RC_GOOGLE_KEY が渡されたAndroidビルドだけ RevenueCat を使い、それ以外は
+  // 仮の購入サービス。価格（仮サービス側）は競合調査を踏まえた暫定値で、運営者確認が必要（決定14）。
+  // RevenueCat 側は entitlement ID を 'noads' / 'premium'、商品を現行オファリングに登録する。
+  final EntitlementService entitlementService = _useRevenueCat
+      ? await RevenueCatEntitlementService.init(publicSdkKey: _rcGoogleKey)
+      : FakeEntitlementService(
+    availableOffers: const [
+      EntitlementOffer(
+        id: 'noads',
+        productId: 'it_passport_noads',
+        title: '広告非表示',
+        priceString: '¥480',
+      ),
+      EntitlementOffer(
+        id: 'premium',
+        productId: 'it_passport_premium',
+        title: 'プレミアム（広告非表示＋追加機能）',
+        priceString: '¥1,500',
+      ),
+    ],
+    grantOnPurchase: const {
+      'it_passport_noads': EntitlementState(hasNoAds: true),
+      'it_passport_premium': EntitlementState(hasPremium: true),
+    },
+  );
+
+  // 広告（AdMob、決定35）。noads/premiumの間は何も表示しない。
+  final adGate = await AdGate.init(
+    config: AdConfig(unitIds: _adUnitIds()),
+    // Web には広告SDK（google_mobile_ads）が無いため、広告を出さない実装にする。
+    backend: kIsWeb ? NoAdsBackend() : null,
+    adsHidden: () => entitlementService.state.adsHidden,
+    isRelease: kReleaseMode,
+  );
+
+  // 全国平均点・偏差値の匿名集計（決定32）。Firebaseプロジェクトを取得後、
+  // FirebaseExamStatsService へ差し替える（firebase_core の初期化が必要）。
+  final examStatsService = FakeExamStatsService();
+
+  // ブックマーク・タグ・問題メモ（端末内に保存）。
+  final studyNotes = await studyNotesOverrides('it_passport');
+
+  // デイリーミッション（今日の目標問題数）と学習カレンダー用の履歴。端末内に保存する。
+  final dailyGoal = await dailyGoalOverrides('it_passport');
+  final reminder = await reminderOverrides('it_passport');
+  final achievementUnlock = await achievementUnlockOverrides('it_passport');
+  final mockExamHistory = await mockExamHistoryOverrides('it_passport');
+
+  final container = ProviderContainer(
+    overrides: [
+      coinServiceProvider.overrideWithValue(coinService),
+      outfitServiceProvider.overrideWithValue(outfitService),
+      entitlementServiceProvider.overrideWithValue(entitlementService),
+      adGateProvider.overrideWithValue(adGate),
+      examStatsServiceProvider.overrideWithValue(examStatsService),
+      handsFreeStoreProvider.overrideWithValue(SharedPreferencesHandsFreeStore('it_passport')),
+      examDateStoreProvider.overrideWithValue(ExamDateStore('it_passport')),
+      ...studyNotes,
+      ...dailyGoal,
+      ...reminder,
+      ...achievementUnlock,
+      ...mockExamHistory,
+      dailyGoalAchievementsOverride,
+      // 端末の通知は、スマホ（Android・iOS）だけ。Web は何もしない既定のまま。
+      if (!kIsWeb) reminderNotifierProvider.overrideWithValue(LocalReminderNotifier()),
+    ],
+  );
+  await container.read(handsFreeProvider.notifier).load();
+  await container.read(examDateProvider.notifier).load();
+
+  runApp(UncontrolledProviderScope(
+    container: container,
+    child: const UkalabItPassportApp(),
+  ));
+}
+
+/// 同梱フォント（BIZ UDPGothic）。端末のフォントで漢字の字形が変わるのを防ぐ。
+const kAppFontFamily = 'BIZUDPGothic';
+
+ThemeData _withFont(ThemeData t) => t.copyWith(
+      textTheme: t.textTheme.apply(fontFamily: kAppFontFamily),
+      primaryTextTheme: t.primaryTextTheme.apply(fontFamily: kAppFontFamily),
+    );
+
+/// 実績の解除通知のスナックバーを、どの画面にいても表示するためのキー。
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+class UkalabItPassportApp extends ConsumerWidget {
+  const UkalabItPassportApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    watchAchievementUnlocks(ref, scaffoldMessengerKey);
+    return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      builder: (context, child) => ReminderNotificationWatcher(child: child ?? const SizedBox.shrink()),
+      title: 'うかラボ ITパスポート',
+      debugShowCheckedModeBanner: false,
+      locale: const Locale('ja', 'JP'),
+      theme: _withFont(UkalabTheme.light(field: UkalabField.it, cert: UkalabCert.itPassport)),
+      darkTheme: _withFont(UkalabTheme.dark(field: UkalabField.it, cert: UkalabCert.itPassport)),
+      home: const _RootPage(),
+    );
+  }
+}
+
+class _RootPage extends ConsumerWidget {
+  const _RootPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final examData = ref.watch(examDataProvider);
+    return examData.when(
+      loading: () => const StartupSplash(),
+      error: (e, st) => Scaffold(
+        body: ErrorState(
+          message: '問題データを読み込めませんでした。\n$e',
+          onRetry: () => ref.invalidate(examDataProvider),
+        ),
+      ),
+      data: (data) {
+        final questions = data.activeQuestions;
+        return UkalabShell(
+          pages: [
+            HomeScreen(
+              exam: data.exam,
+              questions: questions,
+              terms: data.terms,
+              chapterReadings: data.chapterReadings,
+            ),
+            LearnScreen(questions: questions, terms: data.terms),
+            MockExamScreen(exam: data.exam, questions: questions),
+            RecordScreen(exam: data.exam, questions: questions),
+            SettingsScreen(questions: questions, exam: data.exam, terms: data.terms),
+          ],
+        );
+      },
+    );
+  }
+}
