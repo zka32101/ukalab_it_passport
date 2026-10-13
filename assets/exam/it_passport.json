@@ -1,21 +1,21 @@
 {
   "examId": "it_passport",
-  "name": "ITパスポート試験",
+  "name": "ITパスポート試験（新制度・シラバス案 Ver.0.1準拠）",
   "audience": "adult",
   "subjects": [
     {
-      "subjectId": "strategy",
-      "name": "ストラテジ系",
+      "subjectId": "business",
+      "name": "ビジネス",
       "order": 1
     },
     {
-      "subjectId": "management",
-      "name": "マネジメント系",
+      "subjectId": "technology",
+      "name": "テクノロジ",
       "order": 2
     },
     {
-      "subjectId": "technology",
-      "name": "テクノロジ系",
+      "subjectId": "security_ethics",
+      "name": "セキュリティ・倫理",
       "order": 3
     }
   ],
@@ -30,9 +30,9 @@
         "subjectMinPct": 30
       },
       "subjectQuestionCounts": {
-        "strategy": 35,
-        "management": 20,
-        "technology": 45
+        "business": 46,
+        "technology": 27,
+        "security_ethics": 27
       }
     }
   ],
