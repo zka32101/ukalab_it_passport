@@ -74,6 +74,17 @@ function check(name, ok) {
   }
   check('ページエラーなし（各タブ）', errors.length === 0);
 
+  // アプリ固有の文言（ホーム／学ぶ／模擬）。E2E_HOME / E2E_LEARN / E2E_MOCK にカンマ区切りで渡す。
+  const expectOn = async (tab, env) => {
+    const items = (process.env[env] || '').split(',').filter(Boolean);
+    if (!items.length) return;
+    await click(tab);
+    for (const s of items) check(`${tab}に「${s}」`, await waitText(s));
+  };
+  await expectOn('ホーム', 'E2E_HOME');
+  await expectOn('学ぶ', 'E2E_LEARN');
+  await expectOn('模擬', 'E2E_MOCK');
+
   // 設定タブ
   await click('設定');
   for (const s of settingsExpect) check(`設定に「${s}」`, await waitText(s));
