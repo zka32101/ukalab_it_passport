@@ -16,7 +16,7 @@ ITパスポート試験対策アプリ。**IPA（独立行政法人情報処理�
 
 ```
 assets/
-  exam/it_passport.json               ExamConfig（3分野: ストラテジ系・マネジメント系・テクノロジ系）
+  exam/it_passport.json               ExamConfig（新制度の3分野: ビジネス・テクノロジ・セキュリティ・倫理）
   questions/it_passport.jsonl         問題データ（JSON Lines）
   terms/it_passport.jsonl             用語データ
   experience/reading_it_passport.jsonl 分野ごとの解説読み物
@@ -43,15 +43,15 @@ flutter test
 dart run ukalab_core:validate_content assets/exam/it_passport.json --subtopic-scope=subject --terms assets/terms/it_passport.jsonl assets/questions/it_passport.jsonl
 ```
 
-## 試験定義（暫定・公式要確認）
+## 試験定義（新制度・シラバス案 Ver.0.1 準拠、暫定）
 
-- 出題数100問・試験時間120分。出題分野はストラテジ系35問・マネジメント系20問・テクノロジ系45問。
-- 合格ライン: 総合 60%（600/1,000点）かつ各分野 30%（300/1,000点）以上（`passRule: totalPct 60 / subjectMinPct 30`）。
-- **IPA公式の最新の案内（出題数・配分・合格基準・シラバス版）で運営者確認が必須**。
+- 2027年度春頃に移行する新制度（IPA）に合わせ、分野は「ビジネス」「テクノロジ」「セキュリティ・倫理」。出題数100問・試験時間120分。
+- 分野別の出題数（46/27/27）と合格基準（総合60%・各分野30%）は**暫定値**。IPAの公開資料に記載がなく、中分類の数に比例させた値と、現行制度の値を使っている。正式発表で更新する。
+- 分野・中分類との対応と要確認事項は [`docs/syllabus_coverage.md`](docs/syllabus_coverage.md) を参照。
 
 ## 現状（2026-10-13 時点）
 
 - 共通部品（core v0.63.0）: 用語集・間違いノート・週間ふりかえり・推しの一言・試験日カウントダウン・試験直前モード／チェックリスト・衣装／背景プレゼントの土台を継承。
-- 問題は**サンプル77問**（ストラテジ26・マネジメント11・テクノロジ40）、用語71語、解説読み物3本。本番の出題比率（35:20:45）に対しマネジメント系が少ないため、**公開前に大幅な追加が必要**（目標は数百問規模）。全て自作・運営者確認前の仮データ。
+- 問題は**サンプル86問**（ビジネス41・テクノロジ24・セキュリティ・倫理21）、用語81語、解説読み物3本。新制度で強化された領域（データマネジメント・AI利活用・AI倫理）の自作問題を含む。全て自作・運営者確認前の仮データで、**公開前に大幅な追加が必要**（目標は数百問規模）。
 - 広告は Google 公式のテスト用ID、課金は `FakeEntitlementService`（仮）。本番IDの発行・差し替えは `PRELAUNCH_CHECKLIST.md` を参照。
 - アプリアイコン・Android/iOS のパッケージ ID（`com.yourwish.ukalab.it_passport`）は G検定の複製のまま。アイコン差し替えが必要。

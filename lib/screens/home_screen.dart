@@ -131,7 +131,7 @@ class HomeScreen extends ConsumerWidget {
               child: ListTile(
                 leading: const Icon(Icons.auto_stories_outlined),
                 title: const Text('分野ごとの解説読み物'),
-                subtitle: const Text('ストラテジ・マネジメント・テクノロジの3分野を、体系的に読めます。'),
+                subtitle: const Text('ビジネス・テクノロジ・セキュリティ・倫理の3分野を、体系的に読めます。'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
