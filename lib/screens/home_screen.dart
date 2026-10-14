@@ -10,6 +10,7 @@ import 'package:ukalab_core/exam_date.dart';
 import '../data/exam_repository.dart';
 import '../widgets/oshi_card.dart';
 import '../widgets/oshi_home_cards.dart';
+import 'core_v069_cards.dart';
 import 'mistake_note_screen.dart';
 import 'pace_run_screen.dart';
 import 'exam_prep_entry.dart';
@@ -88,9 +89,16 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           const DailyMissionCard(),
           const StudyReminderCard(),
+          const SizedBox(height: 8),
+          // 今日の復習(間違いノートから。期限が来た分だけ穏やかに案内)。
+          TodayReviewHomeCard(exam: exam, questions: questions, terms: terms),
           const SizedBox(height: 16),
           // 週間ふりかえり(無料。今週できたことだけを見せる)。
           WeeklyRecapSection(exam: exam, questions: questions),
+          const SizedBox(height: 8),
+          MockExamAnalysisHomeCard(exam: exam),
+          const SizedBox(height: 8),
+          const OshiGrowthHomeCard(),
           const SizedBox(height: 16),
           PremiumPracticeCards(exam: exam, questions: questions, terms: terms),
           const SizedBox(height: 16),
