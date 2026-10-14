@@ -101,12 +101,13 @@ void main() {
   final today = DateTime.now();
   DateTime daysAgo(int n) => DateTime(today.year, today.month, today.day - n, 9);
 
-  testWidgets('今日の復習・結果分析・推しの成長が出る（履歴なし）', (tester) async {
+  testWidgets('今日の復習・結果分析が出て、成長の吹き出しは出ない（履歴なし）', (tester) async {
     await _pump(tester);
     expect(find.byType(TodayReviewCard), findsOneWidget);
     expect(_dueShown(tester), 0);
     expect(find.byType(MockExamAnalysisCard), findsOneWidget);
-    expect(find.byType(OshiGrowthBubble), findsOneWidget);
+    expect(find.byType(OshiGrowthHomeCard), findsOneWidget); // 祝福の見張り役は残す
+    expect(find.byType(OshiGrowthBubble, skipOffstage: false), findsNothing);
     expect(find.byType(OshiGrowthCelebrationCard), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -177,7 +178,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(TodayReviewCard), findsOneWidget);
     expect(find.byType(MockExamAnalysisCard, skipOffstage: false), findsOneWidget);
-    expect(find.byType(OshiGrowthBubble, skipOffstage: false), findsOneWidget);
+    expect(find.byType(OshiGrowthBubble, skipOffstage: false), findsNothing);
   });
 
   group('recordReviewResult', () {
