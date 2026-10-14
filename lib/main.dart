@@ -25,6 +25,7 @@ import 'screens/record_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/local_reminder_notifier.dart';
 import 'services/no_ads_backend.dart';
+import 'widgets/scrollable_center.dart';
 
 /// Google公式のテスト広告ユニットID。本番公開前に実際のIDへ差し替える（決定35）。
 AdUnitIds _adUnitIds() => kIsWeb
@@ -190,9 +191,11 @@ class _RootPage extends ConsumerWidget {
     return examData.when(
       loading: () => const StartupSplash(),
       error: (e, st) => Scaffold(
-        body: ErrorState(
-          message: '問題データを読み込めませんでした。\n$e',
-          onRetry: () => ref.invalidate(examDataProvider),
+        body: ScrollableCenter(
+          child: ErrorState(
+            message: '問題データを読み込めませんでした。\n$e',
+            onRetry: () => ref.invalidate(examDataProvider),
+          ),
         ),
       ),
       data: (data) {

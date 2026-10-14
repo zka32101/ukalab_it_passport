@@ -4,6 +4,8 @@ import 'package:app_common_kit/app_common_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:ukalab_core/ukalab_core.dart';
 
+import '../widgets/scrollable_center.dart';
+
 /// 「100問ペース走」画面（型④の直前版、決定76）。
 ///
 /// 本番「120分で100問」のペース感覚を、短縮版（20問×24分）で体感する。
@@ -89,7 +91,7 @@ class _PaceRunScreenState extends State<PaceRunScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.questions.isEmpty) {
-      return const EmptyState(message: '問題データがまだありません。');
+      return const ScrollableCenter(child: EmptyState(message: '問題データがまだありません。'));
     }
     if (!_started) return _buildIntro(context);
     if (_finished) return _buildResult(context);
@@ -98,7 +100,7 @@ class _PaceRunScreenState extends State<PaceRunScreen> {
 
   Widget _buildIntro(BuildContext context) {
     final config = PaceRunScreen._config;
-    return Center(
+    return ScrollableCenter(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -122,7 +124,7 @@ class _PaceRunScreenState extends State<PaceRunScreen> {
   }
 
   Widget _buildResult(BuildContext context) {
-    return Center(
+    return ScrollableCenter(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -160,7 +162,9 @@ class _PaceRunScreenState extends State<PaceRunScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('残り $minutes:$seconds', style: Theme.of(context).textTheme.titleMedium),
+              Expanded(
+                child: Text('残り $minutes:$seconds', style: Theme.of(context).textTheme.titleMedium),
+              ),
               IconButton(
                 icon: Icon(flagged ? Icons.flag : Icons.flag_outlined),
                 color: flagged ? Theme.of(context).colorScheme.error : null,
