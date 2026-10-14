@@ -6,6 +6,7 @@ import 'package:ukalab_core/ukalab_core.dart';
 import 'package:ukalab_core/ui.dart';
 
 import 'learn_screen.dart';
+import '../widgets/scrollable_center.dart';
 
 /// 章ごとの解説読み物（教科書的なまとめページ）の一覧。
 class ReadingListScreen extends ConsumerWidget {
@@ -47,7 +48,7 @@ class ReadingListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (readings.isEmpty) {
-      return const EmptyState(message: '解説読み物のデータがまだありません。');
+      return const ScrollableCenter(child: EmptyState(message: '解説読み物のデータがまだありません。'));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),

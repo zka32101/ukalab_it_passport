@@ -9,6 +9,7 @@ import 'package:ukalab_core/ukalab_core.dart';
 
 import '../data/progress_store.dart';
 import '../widgets/oshi_card.dart';
+import '../widgets/scrollable_center.dart';
 
 /// 「模擬」タブ: 本試験相当の採点（合格ラインの目安は非公開のため70%を目安と明記）。
 ///
@@ -228,12 +229,13 @@ class _MockExamScreenState extends ConsumerState<MockExamScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.questions.isEmpty) {
-      return const EmptyState(message: '問題データがまだありません。');
+      return const ScrollableCenter(child: EmptyState(message: '問題データがまだありません。'));
     }
     final level = widget.exam.levels.first;
 
     if (!_started) {
-      return Center(
+      // 文字を大きくした端末・狭い画面でも「始める」ボタンまで届くよう、はみ出す分はスクロールさせる。
+      return ScrollableCenter(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
