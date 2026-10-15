@@ -8,6 +8,7 @@ import 'package:ukalab_core/daily_goal.dart' show DailyMissionCard;
 import 'package:ukalab_core/reminder.dart' show StudyReminderCard;
 import 'package:ukalab_core/exam_date.dart';
 import '../data/exam_repository.dart';
+import '../widgets/cert_prop_badge.dart';
 import '../widgets/oshi_card.dart';
 import '../widgets/oshi_home_cards.dart';
 import 'core_v069_cards.dart';
@@ -51,11 +52,25 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('うかラボ ITパスポート', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text(
-            'ITパスポート試験 対策（IPA・情報処理推進機構とは無関係の非公式アプリ）',
-            style: theme.textTheme.bodySmall,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('うかラボ ITパスポート', style: theme.textTheme.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(
+                      'ITパスポート試験 対策（IPA・情報処理推進機構とは無関係の非公式アプリ）',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const CertPropBadge(),
+            ],
           ),
           const SizedBox(height: 16),
           OshiCard(
