@@ -155,6 +155,15 @@ void main() async {
 /// 同梱フォント（BIZ UDPGothic）。端末のフォントで漢字の字形が変わるのを防ぐ。
 const kAppFontFamily = 'BIZUDPGothic';
 
+/// 起動画面（ネイティブ起動画面と同じブランド色・アイコン）。
+const kLaunchBackgroundColor = Color(0xFF4875DE);
+const kLaunchIconAsset = 'assets/icon/app_icon.png';
+
+Widget buildStartupSplash() => const StartupSplash(
+      appIconAsset: kLaunchIconAsset,
+      backgroundColor: kLaunchBackgroundColor,
+    );
+
 ThemeData _withFont(ThemeData t) => t.copyWith(
       textTheme: t.textTheme.apply(fontFamily: kAppFontFamily),
       primaryTextTheme: t.primaryTextTheme.apply(fontFamily: kAppFontFamily),
@@ -189,7 +198,7 @@ class _RootPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final examData = ref.watch(examDataProvider);
     return examData.when(
-      loading: () => const StartupSplash(),
+      loading: buildStartupSplash,
       error: (e, st) => Scaffold(
         body: ScrollableCenter(
           child: ErrorState(
