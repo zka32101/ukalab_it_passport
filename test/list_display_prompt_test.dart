@@ -18,7 +18,7 @@ Question _q(QuestionType type, String prompt,
       clue: clue,
       answers: answers,
       choices: choices,
-      answerIndex: type == QuestionType.choice ? 0 : null,
+      answerIndex: 0,
     );
 
 void main() {
