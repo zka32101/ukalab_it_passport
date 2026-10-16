@@ -17,10 +17,10 @@ Question _q(String id, String label) => Question(
       examId: 'it_passport',
       subjectId: 'ml_overview',
       topicId: id,
-      prompt: '問題${label}の文',
-      choices: ['${label}の正解', '${label}の誤り1', '${label}の誤り2', '${label}の誤り3'],
+      prompt: '問題$labelの文',
+      choices: ['$labelの正解', '$labelの誤り1', '$labelの誤り2', '$labelの誤り3'],
       answerIndex: 0,
-      explanation: '解説${label}の本文',
+      explanation: '解説$labelの本文',
       source: QuestionSource.original,
       sourceRef: '自作',
       contentVer: '1',
@@ -69,18 +69,18 @@ void main() {
     final label = KitStrings.of(tester.element(find.byType(QuestionCard))).questionNoOfTotal(1, 2);
     expect(find.text(label), findsOneWidget);
 
-    await tester.tap(find.text('${first}の誤り1'));
+    await tester.tap(find.text('$firstの誤り1'));
     await tester.pumpAndSettle();
 
     void check() {
-      expect(find.text('解説${first}の本文'), findsOneWidget);
-      expect(find.text('解説${other}の本文'), findsNothing);
-      expect(find.text('問題${first}の文'), findsOneWidget);
-      expect(find.text('問題${other}の文'), findsNothing);
+      expect(find.text('解説$firstの本文'), findsOneWidget);
+      expect(find.text('解説$otherの本文'), findsNothing);
+      expect(find.text('問題$firstの文'), findsOneWidget);
+      expect(find.text('問題$otherの文'), findsNothing);
       expect(find.text(label), findsOneWidget);
-      expect(_stateOf(tester, '${first}の正解'), ChoiceState.correct);
-      expect(_stateOf(tester, '${first}の誤り1'), ChoiceState.incorrect);
-      expect(_stateOf(tester, '${first}の誤り2'), ChoiceState.idle);
+      expect(_stateOf(tester, '$firstの正解'), ChoiceState.correct);
+      expect(_stateOf(tester, '$firstの誤り1'), ChoiceState.incorrect);
+      expect(_stateOf(tester, '$firstの誤り2'), ChoiceState.idle);
     }
 
     check();
@@ -95,16 +95,16 @@ void main() {
 
     final first = _shown();
     final other = first == 'A' ? 'B' : 'A';
-    await tester.tap(find.text('${first}の正解'));
+    await tester.tap(find.text('$firstの正解'));
     await tester.pumpAndSettle();
     _rebuildParent();
     await tester.pumpAndSettle();
     await _tapNext(tester);
 
-    expect(find.text('問題${other}の文'), findsOneWidget);
-    expect(find.text('解説${first}の本文'), findsNothing);
-    expect(find.text('解説${other}の本文'), findsNothing);
-    expect(_stateOf(tester, '${other}の正解'), ChoiceState.idle);
+    expect(find.text('問題$otherの文'), findsOneWidget);
+    expect(find.text('解説$firstの本文'), findsNothing);
+    expect(find.text('解説$otherの本文'), findsNothing);
+    expect(_stateOf(tester, '$otherの正解'), ChoiceState.idle);
     final label = KitStrings.of(tester.element(find.byType(QuestionCard))).questionNoOfTotal(2, 2);
     expect(find.text(label), findsOneWidget);
   });
@@ -115,17 +115,17 @@ void main() {
 
     final first = _shown();
     final other = first == 'A' ? 'B' : 'A';
-    await tester.tap(find.text('${first}の正解'));
+    await tester.tap(find.text('$firstの正解'));
     await tester.pumpAndSettle();
     await _tapNext(tester);
 
-    await tester.tap(find.text('${other}の誤り1'));
+    await tester.tap(find.text('$otherの誤り1'));
     await tester.pumpAndSettle();
     _rebuildParent();
     await tester.pumpAndSettle();
-    expect(find.text('解説${other}の本文'), findsOneWidget);
+    expect(find.text('解説$otherの本文'), findsOneWidget);
     expect(find.byType(ResultSummary), findsNothing);
-    expect(_stateOf(tester, '${other}の誤り1'), ChoiceState.incorrect);
+    expect(_stateOf(tester, '$otherの誤り1'), ChoiceState.incorrect);
 
     await _tapNext(tester);
     expect(find.byType(ResultSummary), findsOneWidget);
