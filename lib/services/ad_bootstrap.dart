@@ -14,8 +14,9 @@ Future<AdGate> initAdGateSafely({
   required bool Function() adsHidden,
   AdsBackend? backend,
   bool isRelease = kReleaseMode,
-  void Function(String message) log = debugPrint,
+  void Function(String message)? log,
 }) async {
+  final emit = log ?? (String m) => debugPrint(m);
   try {
     return await AdGate.init(
       config: AdConfig(unitIds: unitIds),
@@ -24,7 +25,7 @@ Future<AdGate> initAdGateSafely({
       isRelease: isRelease,
     );
   } catch (e) {
-    log('AdGate.init failed; continuing without ads: $e');
+    emit('AdGate.init failed; continuing without ads: $e');
     return AdGate.init(
       config: const AdConfig(unitIds: AdUnitIds(banner: '', interstitial: '', rewarded: '')),
       backend: NoAdsBackend(),
