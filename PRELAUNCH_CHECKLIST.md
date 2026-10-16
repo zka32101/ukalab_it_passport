@@ -12,8 +12,8 @@
 
 ## 本番環境・運用
 
-- [ ] `ops` AdMob のアプリID・広告ユニットIDを発行して差し替え（現在はGoogle公式テスト用）
-- [ ] `ops` RevenueCat のAPIキー取得（現在は `FakeEntitlementService`）。商品ID `it_passport_noads` / `it_passport_premium`
+- [ ] `ops` AdMob のアプリID・広告ユニットIDを発行して差し替え（現在はGoogle公式テスト用。テスト用IDのままのリリースビルドは `AdGate` の初期化に失敗し、広告なしで続行する設計。実機確認は未確認）
+- [ ] `ops` RevenueCat のAPIキー取得（現在は `FakeEntitlementService`。`RC_GOOGLE_KEY`／`RC_APPLE_KEY` を `--dart-define` で渡したビルドのみ RevenueCat 有効）。商品ID `it_passport_noads` / `it_passport_premium`
 - [x] `ops` アプリアイコン・パッケージIDの差し替え（ITパス用アイコン適用済み。Android `com.yourwish.ukalab.it_passport` / iOS `com.yourwish.ukalabItPassport`。ストア登録・Firebase はこの新IDで作成する）
 - [ ] `ops` Firebase プロジェクトの作成と `firestore.rules` のデプロイ
 - [ ] `ops` 価格（noads ¥480・premium ¥1,500）の最終確認
