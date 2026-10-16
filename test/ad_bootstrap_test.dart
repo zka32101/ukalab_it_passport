@@ -17,8 +17,8 @@ void main() {
   group('initAdGateSafely', () {
     test('リリース扱いでテスト広告IDが残っていても例外にならず、理由をログに出す', () async {
       // 素の AdGate.init なら StateError になる条件。
-      expect(
-        () => AdGate.init(
+      await expectLater(
+        AdGate.init(
           config: const AdConfig(unitIds: _testIds),
           adsHidden: () => false,
           backend: FakeAdsBackend(),
