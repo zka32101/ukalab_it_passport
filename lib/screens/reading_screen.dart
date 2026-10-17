@@ -81,7 +81,7 @@ class ReadingListScreen extends ConsumerWidget {
                         if (_questionById(id) != null)
                           RelatedQuestionRef(
                             questionId: id,
-                            label: _questionById(id)!.prompt,
+                            label: _questionById(id)!.displayPrompt,
                           ),
                     ],
                     bodyTermReferences: termReferences,

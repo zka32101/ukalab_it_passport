@@ -53,5 +53,5 @@ dart run ukalab_core:validate_content assets/exam/it_passport.json --subtopic-sc
 
 - 共通部品（core v0.63.0）: 用語集・間違いノート・週間ふりかえり・推しの一言・試験日カウントダウン・試験直前モード／チェックリスト・衣装／背景プレゼントの土台を継承。
 - 問題は**1074問**（ビジネス443・テクノロジ316・セキュリティ・倫理315）、用語640語、解説読み物3本。シラバス案の全中分類の用語例を網羅するように作成し、新制度で強化された領域（データマネジメント・AI利活用・AI倫理）も含む。全て自作・運営者確認前の仮データで、**公開前に運営者確認と追加が必要**（目標の約1,000問には到達。運営者確認が必要）。
-- 広告は Google 公式のテスト用ID、課金は `FakeEntitlementService`（仮）。本番IDの発行・差し替えは `PRELAUNCH_CHECKLIST.md` を参照。
+- 広告はテスト用ID（Google 公式）。課金は、ビルド時に `RC_GOOGLE_KEY`（Android）／`RC_APPLE_KEY`（iOS）を `--dart-define` で渡したビルドだけ RevenueCat が有効で、それ以外は `FakeEntitlementService`（実際の決済なし）。リリースビルドにテスト用IDが残ると `AdGate` の初期化が失敗し、起動は止めずに広告なしで続行する設計（`lib/services/ad_bootstrap.dart`）。ストア向けビルドでの実機確認は未確認。本番IDの発行・差し替えは `PRELAUNCH_CHECKLIST.md` を参照。
 - アプリアイコンは ITパス用に差し替え済み（AI生成素材・Leonardo.Ai 規約確認は保留中）。パッケージ ID は Android `com.yourwish.ukalab.it_passport` / iOS `com.yourwish.ukalabItPassport`（G検定とは別ID。Play Console / App Store Connect / Firebase は新IDで作成する）。
