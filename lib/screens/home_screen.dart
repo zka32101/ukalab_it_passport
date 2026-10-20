@@ -165,6 +165,7 @@ class HomeScreen extends ConsumerWidget {
                         terms: terms,
                         questions: questions,
                         termReferences: termReferences,
+                        subjectNames: {for (final s in exam.subjects) s.subjectId: s.name},
                       ),
                     ),
                   ),
