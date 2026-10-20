@@ -213,6 +213,8 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _saveHistory(BuildContext context, WidgetRef ref) async {
+    // 履歴は初回の読み取りで読み込みが始まるため、読み終えるのを待ってから使う。
+    await ref.read(historyProvider.notifier).ready;
     final records = ref.read(historyProvider);
     final strings = ExamPrepStrings.ja;
     String? message;

@@ -101,6 +101,7 @@ Future<void> _tapDownload(WidgetTester tester) async {
   final tile = find.byKey(const ValueKey('downloadHistoryCsv'));
   await tester.scrollUntilVisible(tile, 300, scrollable: find.byType(Scrollable).first);
   await tester.tap(tile);
+  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
   await tester.pumpAndSettle();
 }
 
