@@ -16,6 +16,7 @@ class ReadingListScreen extends ConsumerWidget {
     required this.terms,
     required this.questions,
     required this.termReferences,
+    this.subjectNames = const {},
   });
 
   final List<ChapterReading> readings;
@@ -24,6 +25,10 @@ class ReadingListScreen extends ConsumerWidget {
 
   /// 本文中で検出してタップ可能にする用語（既存の用語集と同じ一覧）。
   final List<TermReference> termReferences;
+
+  /// subjectId → 分野名。渡すと、一覧を分野ごとの見出しでグループ分けする（章が増えても探しやすくする）。
+  /// 空なら見出しなしの1本のリストで表示する。
+  final Map<String, String> subjectNames;
 
   Term? _termById(String termId) {
     for (final t in terms) {
@@ -50,12 +55,30 @@ class ReadingListScreen extends ConsumerWidget {
     if (readings.isEmpty) {
       return const ScrollableCenter(child: EmptyState(message: '解説読み物のデータがまだありません。'));
     }
+    // 分野の見出し（subjectNames にある分野のみ）。章の並びは読み込み順（データ側で分野ごとに並べる）を保つ。
+    final rows = <Object>[]; // String（見出し）または ChapterReading
+    final seenSubjects = <String>{};
+    for (final r in readings) {
+      final name = subjectNames[r.subjectId];
+      if (name != null && seenSubjects.add(r.subjectId)) rows.add(name);
+      rows.add(r);
+    }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: readings.length,
+      itemCount: rows.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
-        final r = readings[i];
+        final row = rows[i];
+        if (row is String) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Semantics(
+              header: true,
+              child: Text(row, style: Theme.of(context).textTheme.titleMedium),
+            ),
+          );
+        }
+        final r = row as ChapterReading;
         return Card(
           child: ListTile(
             leading: const Icon(Icons.menu_book_outlined),
