@@ -11,6 +11,8 @@ import '../data/feature_flags.dart';
 import '../data/history_store.dart';
 import '../data/review_schedule.dart';
 import '../data/progress_store.dart';
+import '../data/exam_repository.dart';
+import '../widgets/learn_tools_section.dart';
 import '../widgets/scrollable_center.dart';
 
 /// 「学ぶ」タブ: 短い演習セッション（最小実装。間隔反復・弱点優先は後続）。
@@ -21,6 +23,8 @@ class LearnScreen extends ConsumerStatefulWidget {
     required this.terms,
     this.sessionSize = 10,
     this.newTypesEnabled = kNewQuestionTypesEnabled,
+    this.exam,
+    this.chapterReadings = const [],
   });
 
   final List<Question> questions;
@@ -30,6 +34,11 @@ class LearnScreen extends ConsumerStatefulWidget {
   /// ○×・空欄補充・説明から用語を出題に含めるか（既定は [kNewQuestionTypesEnabled]）。
   /// false のときは [questions] に含まれていても出さない（二重の防御）。
   final bool newTypesEnabled;
+
+  /// 渡すと、画面の下に「道具」（間違いノート・メモ・用語集・読み物の入口）を出す。
+  /// 「学ぶ」タブ本体だけが渡す（弱点ドリルなど、演習だけを開く使い方では渡さない）。
+  final ExamConfig? exam;
+  final List<ChapterReading> chapterReadings;
 
   @override
   ConsumerState<LearnScreen> createState() => _LearnScreenState();
@@ -214,10 +223,34 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
     return widgets;
   }
 
+  /// 「道具」の入口。[LearnScreen.exam] を渡されたときだけ。
+  Widget _tools() {
+    final exam = widget.exam;
+    if (exam == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: LearnToolsSection(
+        exam: exam,
+        questions: widget.questions,
+        terms: widget.terms,
+        chapterReadings: widget.chapterReadings,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_pool.isEmpty) {
-      return const ScrollableCenter(child: EmptyState(message: '問題データがまだありません。'));
+      final exam = widget.exam;
+      if (exam == null) {
+        return const ScrollableCenter(child: EmptyState(message: '問題データがまだありません。'));
+      }
+      return SingleChildScrollView(
+        child: Column(children: [
+          const EmptyState(message: '問題データがまだありません。'),
+          _tools(),
+        ]),
+      );
     }
     // 回答済みの間は、回答した問題で描く（_answeredQuestion の説明を参照）。
     final q = _answeredQuestion ?? _session.current;
@@ -236,6 +269,7 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
               ),
               const SizedBox(height: 16),
               adGate.banner(BannerPlacement.result),
+              _tools(),
             ],
           ),
         ),
@@ -306,6 +340,7 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
             const SizedBox(height: 16),
             FilledButton(onPressed: _next, child: const Text('次へ')),
           ],
+          _tools(),
         ],
       ),
     );
@@ -363,6 +398,7 @@ class _LearnScreenState extends ConsumerState<LearnScreen> {
             const SizedBox(height: 12),
             QuestionMemoField(key: ValueKey(q.qid), qid: q.qid),
           ],
+          _tools(),
         ],
       ),
     );
