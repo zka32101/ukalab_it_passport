@@ -7,7 +7,6 @@ import 'package:ukalab_core/ukalab_core.dart';
 import 'package:ukalab_core/daily_goal.dart' show DailyMissionCard;
 import 'package:ukalab_core/reminder.dart' show StudyReminderCard;
 import 'package:ukalab_core/exam_date.dart';
-import '../data/exam_repository.dart';
 import '../widgets/cert_prop_badge.dart';
 import '../widgets/oshi_card.dart';
 import '../widgets/oshi_home_cards.dart';

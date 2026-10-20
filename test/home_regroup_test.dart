@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ukalab_core/ui.dart';
-import 'package:ukalab_core/ukalab_core.dart';
 import 'package:ukalab_it_passport/data/exam_repository.dart';
 import 'package:ukalab_it_passport/screens/home_screen.dart';
 import 'package:ukalab_it_passport/screens/learn_screen.dart';
