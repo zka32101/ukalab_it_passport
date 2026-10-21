@@ -4,6 +4,7 @@ import 'package:ukalab_core/ui.dart';
 import 'package:ukalab_core/ukalab_core.dart';
 
 import '../data/exam_repository.dart';
+import '../screens/it_staff_story_screen.dart';
 import '../screens/mistake_note_screen.dart';
 import '../screens/reading_screen.dart';
 import '../screens/terms_screen.dart';
@@ -64,6 +65,15 @@ class LearnToolsSection extends ConsumerWidget {
               title: '用語集',
               subtitle: '収録${terms.length}語。わからない用語をいつでも調べられます。',
               onTap: () => _push(context, '用語集', TermsScreen(exam: exam, terms: terms)),
+            ),
+            const SizedBox(height: 8),
+            HomeMenuTile(
+              icon: Icons.business_center_outlined,
+              title: '会社のIT担当1年目',
+              subtitle: '架空の会社で月ごとに判断して学ぶ体験型教材。最初の2本は無料です。',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => ItStaffStoryListScreen(terms: terms),
+              )),
             ),
             if (chapterReadings.isNotEmpty) ...[
               const SizedBox(height: 8),
