@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Changed
+- ukalab_core を v0.81.0 に更新し、資格専用キャラ（サーキ）の配線を追加。appId `it_passport` とプレミアム状態を core に渡す（プレミアム購入者のみ選択可、無料はロック表示）。メダル共有は `effectiveCharacterPackProvider` を使う。画像は別PRで core に取り込み予定で、無い間は標準キャラ表示。
 - ukalab_core を v0.79.1 に更新（app_common_kit は v3.12.0 のまま。share_plus は 12.x で core の要求範囲内）。
 - 設定の「学習履歴をコピー（CSV）」を「学習履歴をダウンロード（CSV）」に変更。クリップボードではなく、core の `shareCsv` で UTF-8 BOM 付きの `ukalab_history_YYYYMMDD.csv` として保存（Web はダウンロード、他は共有シート）。個人情報の列は含まない。
 - ukalab_core を v0.76.0 に更新。間違いノート・読み物の関連問題など一覧系の問題文表示を `q.displayPrompt` に変更（cloze の `{{n}}` や reverseLookup の固定文が一覧に出ない）。出題画面は変更なし。
