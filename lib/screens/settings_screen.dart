@@ -71,6 +71,7 @@ class SettingsScreen extends ConsumerWidget {
     this.terms = const [],
     this.fileSaver,
     this.now,
+    this.focusPurchase = false,
   });
 
   /// 履歴CSVの保存（共有）処理。省略時は core の既定（Web はダウンロード、他は共有シート）。テスト用に差し替える。
@@ -78,6 +79,9 @@ class SettingsScreen extends ConsumerWidget {
 
   /// 履歴CSVのファイル名の日付に使う現在時刻。省略時は [DateTime.now]。テスト用。
   final DateTime Function()? now;
+
+  /// true なら、開いた直後に「購入」欄までスクロールする（ホームの推しカードからの誘導用）。
+  final bool focusPurchase;
 
   /// 間違いノートの「解き直す」で演習画面を開くために使う。省略時は間違いノートの入口を出さない。
   final ExamConfig? exam;
@@ -94,6 +98,9 @@ class SettingsScreen extends ConsumerWidget {
     final handsFree = ref.watch(handsFreeProvider);
 
     return ListView(
+      // 購入欄は下の方にあり、ListView は画面外を作らないため、誘導時だけ全体を作ってスクロール先を確保する。
+      // ignore: deprecated_member_use
+      cacheExtent: focusPurchase ? 10000 : null,
       padding: const EdgeInsets.all(16),
       children: [
         const ListTile(
@@ -140,9 +147,12 @@ class SettingsScreen extends ConsumerWidget {
           onTap: () => _saveHistory(context, ref),
         ),
         const Divider(height: 24),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text('購入', style: TextStyle(fontWeight: FontWeight.bold)),
+        _ScrollIntoViewOnce(
+          enabled: focusPurchase,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text('購入', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ),
         const SizedBox(height: 8),
         if (entitlement.adsHidden)
@@ -254,4 +264,30 @@ class SettingsScreen extends ConsumerWidget {
     final message = state.adsHidden ? '購入を復元しました。' : '復元できる購入がありませんでした。';
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+/// [enabled] なら、最初の描画の直後に自分が見える位置までスクロールする（1回だけ）。
+class _ScrollIntoViewOnce extends StatefulWidget {
+  const _ScrollIntoViewOnce({required this.enabled, required this.child});
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  State<_ScrollIntoViewOnce> createState() => _ScrollIntoViewOnceState();
+}
+
+class _ScrollIntoViewOnceState extends State<_ScrollIntoViewOnce> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.enabled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Scrollable.ensureVisible(context, alignment: 0.1);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
