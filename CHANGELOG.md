@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- ukalab_core を v0.82.2 に更新(資格専用キャラの画像が表示される)。
 ### Changed
 - ukalab_core を v0.82.1、app_common_kit を v4.0.0 に更新。kit v4.0.0 で学習向け部品（QuestionCard・AnswerFeedback など）が core の `learning.dart` に移ったため、使うファイルに `import 'package:ukalab_core/learning.dart';` を追加（名前・挙動は同じ）。
 - ホームの推しカードに `onLockedTap` を渡し、ロック中の資格専用キャラ（サーキ）のプレビューの「プレミアムを見る」から、選択画面を閉じて設定画面を開き、購入欄までスクロールするようにした。
