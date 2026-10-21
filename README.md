@@ -55,3 +55,12 @@ dart run ukalab_core:validate_content assets/exam/it_passport.json --subtopic-sc
 - 問題は**1074問**（ビジネス443・テクノロジ316・セキュリティ・倫理315）、用語640語、解説読み物3本。シラバス案の全中分類の用語例を網羅するように作成し、新制度で強化された領域（データマネジメント・AI利活用・AI倫理）も含む。全て自作・運営者確認前の仮データで、**公開前に運営者確認と追加が必要**（目標の約1,000問には到達。運営者確認が必要）。
 - 広告はテスト用ID（Google 公式）。課金は、ビルド時に `RC_GOOGLE_KEY`（Android）／`RC_APPLE_KEY`（iOS）を `--dart-define` で渡したビルドだけ RevenueCat が有効で、それ以外は `FakeEntitlementService`（実際の決済なし）。リリースビルドにテスト用IDが残ると `AdGate` の初期化が失敗し、起動は止めずに広告なしで続行する設計（`lib/services/ad_bootstrap.dart`）。ストア向けビルドでの実機確認は未確認。本番IDの発行・差し替えは `PRELAUNCH_CHECKLIST.md` を参照。
 - アプリアイコンは ITパス用に差し替え済み（AI生成素材・Leonardo.Ai 規約確認は保留中）。パッケージ ID は Android `com.yourwish.ukalab.it_passport` / iOS `com.yourwish.ukalabItPassport`（G検定とは別ID。Play Console / App Store Connect / Firebase は新IDで作成する）。
+
+## Firebase 設定（cross_promo 用）
+
+実ファイルはリポジトリに置かず、GitHub Secrets からリリースビルド時に注入する。
+
+- Secret 名: `GOOGLE_SERVICES_JSON_BASE64`
+- 登録手順: Firebase コンソールから取得した `google-services.json` を base64 化（例: `base64 -w0 google-services.json`）し、リポジトリの Settings → Secrets and variables → Actions に登録する。
+- `Build release AAB` ワークフローは、この Secret が設定されている時だけ `android/app/google-services.json` を生成する。未設定ならスキップし、`google-services` プラグインも適用されない（ファイルがある時だけ適用）。
+- `android/app/google-services.json` と `ios/Runner/GoogleService-Info.plist` は `.gitignore` 済み。iOS への注入は未対応。
