@@ -1,4 +1,4 @@
-import 'package:app_common_kit/app_common_kit.dart';
+import 'package:app_common_kit/app_common_kit.dart' hide SettingsScreen;
 import 'package:ukalab_core/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +12,7 @@ import '../widgets/oshi_card.dart';
 import '../widgets/oshi_home_cards.dart';
 import 'core_v069_cards.dart';
 import 'pace_run_screen.dart';
+import 'settings_screen.dart';
 import 'exam_prep_entry.dart';
 import 'premium_practice_cards.dart';
 import 'route_planner_screen.dart';
@@ -35,6 +36,25 @@ class HomeScreen extends ConsumerWidget {
       Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (context) => Scaffold(appBar: AppBar(title: Text(title)), body: body),
       ));
+
+  /// 推しの選択画面（ロック中の資格専用キャラのプレビュー）から、設定の購入欄へ誘導する。
+  /// ホームからタブを切り替える仕組みは無い（UkalabShell は内部状態）ため、選択画面を閉じて
+  /// 設定画面を push し、購入欄までスクロールして開く。
+  void _openPurchase(BuildContext context) {
+    final navigator = Navigator.of(context);
+    navigator.pop(); // 推しの選択画面を閉じる
+    navigator.push(MaterialPageRoute<void>(
+      builder: (_) => Scaffold(
+        appBar: AppBar(title: const Text('設定')),
+        body: SettingsScreen(
+          questions: questions,
+          exam: exam,
+          terms: terms,
+          focusPurchase: true,
+        ),
+      ),
+    ));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,7 +95,11 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                OshiCard(totalQuestions: questions.length, examDate: examDate),
+                OshiCard(
+                  totalQuestions: questions.length,
+                  examDate: examDate,
+                  onLockedTap: () => _openPurchase(context),
+                ),
                 const SizedBox(height: 8),
                 // 推しの一言(無料)。タップで別の一言。
                 OshiMessageCard(examDate: examDate),

@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Changed
+- ukalab_core を v0.82.1、app_common_kit を v4.0.0 に更新。kit v4.0.0 で学習向け部品（QuestionCard・AnswerFeedback など）が core の `learning.dart` に移ったため、使うファイルに `import 'package:ukalab_core/learning.dart';` を追加（名前・挙動は同じ）。
+- ホームの推しカードに `onLockedTap` を渡し、ロック中の資格専用キャラ（サーキ）のプレビューの「プレミアムを見る」から、選択画面を閉じて設定画面を開き、購入欄までスクロールするようにした。
 - ukalab_core を v0.81.0 に更新し、資格専用キャラ（サーキ）の配線を追加。appId `it_passport` とプレミアム状態を core に渡す（プレミアム購入者のみ選択可、無料はロック表示）。メダル共有は `effectiveCharacterPackProvider` を使う。画像は別PRで core に取り込み予定で、無い間は標準キャラ表示。
 - ukalab_core を v0.79.1 に更新（app_common_kit は v3.12.0 のまま。share_plus は 12.x で core の要求範囲内）。
 - 設定の「学習履歴をコピー（CSV）」を「学習履歴をダウンロード（CSV）」に変更。クリップボードではなく、core の `shareCsv` で UTF-8 BOM 付きの `ukalab_history_YYYYMMDD.csv` として保存（Web はダウンロード、他は共有シート）。個人情報の列は含まない。
