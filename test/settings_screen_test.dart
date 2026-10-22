@@ -27,34 +27,36 @@ const _premiumOffer = EntitlementOffer(
 );
 
 FakeEntitlementService _service() => FakeEntitlementService(
-      availableOffers: const [_noAdsOffer, _premiumOffer],
-      grantOnPurchase: const {
-        'it_passport_noads': EntitlementState(hasNoAds: true),
-        'it_passport_premium': EntitlementState(hasPremium: true),
-      },
-    );
+  availableOffers: const [_noAdsOffer, _premiumOffer],
+  grantOnPurchase: const {
+    'it_passport_noads': EntitlementState(hasNoAds: true),
+    'it_passport_premium': EntitlementState(hasPremium: true),
+  },
+);
 
 Widget _app(
   FakeEntitlementService service, {
   FileSaver? saver,
   DateTime Function()? now,
-}) =>
-    ProviderScope(
-      overrides: [
-        entitlementServiceProvider.overrideWithValue(service),
-        handsFreeStoreProvider.overrideWithValue(InMemoryHandsFreeStore()),
-        ...studyNotesTestOverrides(),
-      ],
-      child: MaterialApp(
-        home: Scaffold(body: SettingsScreen(fileSaver: saver, now: now)),
-      ),
-    );
+}) => ProviderScope(
+  overrides: [
+    entitlementServiceProvider.overrideWithValue(service),
+    handsFreeStoreProvider.overrideWithValue(InMemoryHandsFreeStore()),
+    ...studyNotesTestOverrides(),
+  ],
+  child: MaterialApp(
+    home: Scaffold(
+      body: SettingsScreen(fileSaver: saver, now: now),
+    ),
+  ),
+);
 
 class _SavedFile {
   _SavedFile(this.bytes, this.fileName, this.mimeType);
   final Uint8List bytes;
   final String fileName;
   final String mimeType;
+
   /// BOM（先頭3バイト）を除いた本文。
   String get body => utf8.decode(bytes.sublist(3));
 }
@@ -80,12 +82,15 @@ class _FakeSaver {
 
 void _seedHistory(List<ProgressRecord> records) {
   SharedPreferences.setMockInitialValues({
-    if (records.isNotEmpty) 'ukalab_it_passport_history_v1': encodeHistory(records),
+    if (records.isNotEmpty)
+      'ukalab_it_passport_history_v1': encodeHistory(records),
   });
 }
 
 Future<void> _settle(WidgetTester tester) async {
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+  await tester.runAsync(
+    () => Future<void>.delayed(const Duration(milliseconds: 50)),
+  );
   await tester.pump();
   await tester.pump();
 }
@@ -99,9 +104,15 @@ void _tall(WidgetTester tester) {
 
 Future<void> _tapDownload(WidgetTester tester) async {
   final tile = find.byKey(const ValueKey('downloadHistoryCsv'));
-  await tester.scrollUntilVisible(tile, 300, scrollable: find.byType(Scrollable).first);
+  await tester.scrollUntilVisible(
+    tile,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
   await tester.tap(tile);
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+  await tester.runAsync(
+    () => Future<void>.delayed(const Duration(milliseconds: 50)),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -154,7 +165,8 @@ void main() {
   });
 
   testWidgets('復元できる購入があれば購入済み表示になる', (tester) async {
-    final service = _service()..restorable = const EntitlementState(hasPremium: true);
+    final service = _service()
+      ..restorable = const EntitlementState(hasPremium: true);
     await tester.pumpWidget(_app(service));
     await tester.pumpAndSettle();
 
@@ -187,11 +199,15 @@ void main() {
       PremiumFeature.mockExamHistory,
       PremiumFeature.customMockExam,
       PremiumFeature.readingReadAloud,
+      PremiumFeature.qualificationCharacter,
     ]) {
       expect(find.byKey(ValueKey('premiumBenefit_${f.name}')), findsOneWidget);
     }
     // 設定のCSVは無料なので、プレミアム限定としては載せない。
-    expect(find.byKey(const ValueKey('premiumBenefit_historyExport')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premiumBenefit_historyExport')),
+      findsNothing,
+    );
     expect(find.textContaining('広告も表示されなくなります'), findsOneWidget);
     final all = kItPassportPremiumBenefits.allTexts.join();
     expect(all.contains('公式'), isFalse);
@@ -202,7 +218,8 @@ void main() {
 
   testWidgets('プレミアム購入済みなら、プレミアムでできること は出さない', (tester) async {
     _tall(tester);
-    final service = _service()..restorable = const EntitlementState(hasPremium: true);
+    final service = _service()
+      ..restorable = const EntitlementState(hasPremium: true);
     await tester.pumpWidget(_app(service));
     await tester.pumpAndSettle();
     expect(find.byType(PremiumBenefitsCard), findsOneWidget);
@@ -214,36 +231,45 @@ void main() {
   });
 
   group('学習履歴のCSV（ファイル保存・共有）', () {
-    testWidgets('履歴があれば、UTF-8 BOM付き text/csv で ukalab_history_YYYYMMDD.csv として渡す', (tester) async {
-      _seedHistory([
-        ProgressRecord(
-          qid: 'q1',
-          subjectId: 'ml_overview',
-          correct: true,
-          at: DateTime(2026, 10, 14, 9),
-          topicId: 'overfitting',
-        ),
-      ]);
-      final saver = _FakeSaver();
-      await tester.pumpWidget(_app(_service(), saver: saver.call, now: () => DateTime(2026, 10, 20, 8)));
-      await _settle(tester);
+    testWidgets(
+      '履歴があれば、UTF-8 BOM付き text/csv で ukalab_history_YYYYMMDD.csv として渡す',
+      (tester) async {
+        _seedHistory([
+          ProgressRecord(
+            qid: 'q1',
+            subjectId: 'ml_overview',
+            correct: true,
+            at: DateTime(2026, 10, 14, 9),
+            topicId: 'overfitting',
+          ),
+        ]);
+        final saver = _FakeSaver();
+        await tester.pumpWidget(
+          _app(
+            _service(),
+            saver: saver.call,
+            now: () => DateTime(2026, 10, 20, 8),
+          ),
+        );
+        await _settle(tester);
 
-      await _tapDownload(tester);
+        await _tapDownload(tester);
 
-      expect(saver.calls, hasLength(1));
-      final f = saver.calls.single;
-      expect(f.fileName, 'ukalab_history_20261020.csv');
-      expect(f.mimeType, 'text/csv');
-      expect(f.bytes.take(3).toList(), [0xEF, 0xBB, 0xBF]);
-      expect(f.body, contains('2026-10-14'));
-      // 個人情報（氏名・ID・端末情報・問題文）の列を持たない。
-      final lines = f.body.split('\n');
-      expect(lines.first, '日付,解答数,正答数,正答率(%),学習時間(分)');
-      expect(lines, contains('分野,解答数,正答数,正答率(%)'));
-      expect(f.body.contains('q1'), isFalse); // 問題ID・問題文は含めない
-      expect(find.text(ExamPrepStrings.ja.exportSaved), findsOneWidget);
-      expect(find.text('学習履歴をコピーしました。'), findsNothing);
-    });
+        expect(saver.calls, hasLength(1));
+        final f = saver.calls.single;
+        expect(f.fileName, 'ukalab_history_20261020.csv');
+        expect(f.mimeType, 'text/csv');
+        expect(f.bytes.take(3).toList(), [0xEF, 0xBB, 0xBF]);
+        expect(f.body, contains('2026-10-14'));
+        // 個人情報（氏名・ID・端末情報・問題文）の列を持たない。
+        final lines = f.body.split('\n');
+        expect(lines.first, '日付,解答数,正答数,正答率(%),学習時間(分)');
+        expect(lines, contains('分野,解答数,正答数,正答率(%)'));
+        expect(f.body.contains('q1'), isFalse); // 問題ID・問題文は含めない
+        expect(find.text(ExamPrepStrings.ja.exportSaved), findsOneWidget);
+        expect(find.text('学習履歴をコピーしました。'), findsNothing);
+      },
+    );
 
     testWidgets('履歴が空なら保存せず、その旨を表示する', (tester) async {
       _seedHistory(const []);
