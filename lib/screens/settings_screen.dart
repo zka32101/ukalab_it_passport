@@ -31,7 +31,8 @@ import 'mistake_note_screen.dart';
 /// 学習履歴の書き出しは、設定の CSV ダウンロードが無料のため載せない。
 const kItPassportPremiumBenefits = PremiumBenefitsStrings(
   title: 'プレミアムでできること',
-  freeNote: '広告も表示されなくなります。問題・解説・基本の苦手特訓は、無料のまま使えます。'
+  freeNote:
+      '広告も表示されなくなります。問題・解説・基本の苦手特訓は、無料のまま使えます。'
       '模擬試験と今日の復習は、無料版だと回数に上限があります。',
   benefits: {
     PremiumFeature.weakDrill: PremiumBenefit(
@@ -57,6 +58,10 @@ const kItPassportPremiumBenefits = PremiumBenefitsStrings(
     PremiumFeature.readingReadAloud: PremiumBenefit(
       '解説読み物の読み上げ',
       '章ごとの解説読み物を、全文読み上げで聞けます。',
+    ),
+    PremiumFeature.qualificationCharacter: PremiumBenefit(
+      '資格専用キャラ',
+      'この資格だけのオリジナルキャラを、推しに選べます。',
     ),
   },
 );
@@ -93,7 +98,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final entitlement =
-        ref.watch(entitlementStateProvider).valueOrNull ?? EntitlementState.free;
+        ref.watch(entitlementStateProvider).valueOrNull ??
+        EntitlementState.free;
     final service = ref.watch(entitlementServiceProvider);
     final handsFree = ref.watch(handsFreeProvider);
 
@@ -131,7 +137,8 @@ class SettingsScreen extends ConsumerWidget {
           SwitchListTile(
             title: const Text('問題を読み上げる'),
             value: handsFree.speakQuestion,
-            onChanged: (v) => ref.read(handsFreeProvider.notifier).setSpeakQuestion(v),
+            onChanged: (v) =>
+                ref.read(handsFreeProvider.notifier).setSpeakQuestion(v),
           ),
         ExamDateTile(
           date: ref.watch(examDateProvider),
@@ -158,7 +165,9 @@ class SettingsScreen extends ConsumerWidget {
         if (entitlement.adsHidden)
           ListTile(
             leading: const Icon(Icons.check_circle, color: Colors.green),
-            title: Text(entitlement.hasPremium ? 'プレミアムを購入済みです' : '広告非表示を購入済みです'),
+            title: Text(
+              entitlement.hasPremium ? 'プレミアムを購入済みです' : '広告非表示を購入済みです',
+            ),
           )
         else
           FutureBuilder<List<EntitlementOffer>>(
@@ -194,6 +203,7 @@ class SettingsScreen extends ConsumerWidget {
               PremiumFeature.mockExamHistory,
               PremiumFeature.customMockExam,
               PremiumFeature.readingReadAloud,
+              PremiumFeature.qualificationCharacter,
             ],
           ),
         const Divider(height: 24),
@@ -203,7 +213,8 @@ class SettingsScreen extends ConsumerWidget {
         const Divider(height: 24),
         DataManagementSection(
           parts: itPassportDataParts,
-          description: '学習進捗・解答履歴・自分用メモは、試験日・ブックマークを除いて、'
+          description:
+              '学習進捗・解答履歴・自分用メモは、試験日・ブックマークを除いて、'
               '書き出し・読み込み・リセットができます。',
         ),
         CoreFeatureSettingsTiles(questions: questions),
@@ -213,11 +224,17 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('間違いノート'),
             subtitle: const Text('間違えた問題を見返して、解き直せます。'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => openMistakeNote(context,
-                exam: exam!, questions: questions, terms: terms),
+            onTap: () => openMistakeNote(
+              context,
+              exam: exam!,
+              questions: questions,
+              terms: terms,
+            ),
           ),
         // 掲載リストが空なら何も表示しない。うかラボは大人向けなので保護者ゲートは不要。
-        const UkalabCrossPromoSection(currentAppId: 'com.yourwish.ukalab.it_passport'),
+        const UkalabCrossPromoSection(
+          currentAppId: 'com.yourwish.ukalab.it_passport',
+        ),
       ],
     );
   }
@@ -243,11 +260,19 @@ class SettingsScreen extends ConsumerWidget {
       }
     }
     if (!context.mounted || message == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _purchase(BuildContext context, WidgetRef ref, EntitlementOffer offer) async {
-    final outcome = await ref.read(entitlementServiceProvider).purchaseOffer(offer.id);
+  Future<void> _purchase(
+    BuildContext context,
+    WidgetRef ref,
+    EntitlementOffer offer,
+  ) async {
+    final outcome = await ref
+        .read(entitlementServiceProvider)
+        .purchaseOffer(offer.id);
     if (!context.mounted) return;
     final message = switch (outcome) {
       PurchaseOutcome.success => '購入しました。',
@@ -255,14 +280,18 @@ class SettingsScreen extends ConsumerWidget {
       PurchaseOutcome.blockedByGate => '購入できませんでした。',
       PurchaseOutcome.failed => '購入に失敗しました。',
     };
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _restore(BuildContext context, WidgetRef ref) async {
     final state = await ref.read(entitlementServiceProvider).restore();
     if (!context.mounted) return;
     final message = state.adsHidden ? '購入を復元しました。' : '復元できる購入がありませんでした。';
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
