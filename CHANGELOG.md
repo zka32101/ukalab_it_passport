@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- 分野ごとの解説読み物の一覧に、解いた問題の割合を色の濃淡と「12/40問（30%）」の数値で表示。
 - ukalab_core を v0.82.2 に更新(資格専用キャラの画像が表示される)。
 ### Changed
 - ukalab_core を v0.82.1、app_common_kit を v4.0.0 に更新。kit v4.0.0 で学習向け部品（QuestionCard・AnswerFeedback など）が core の `learning.dart` に移ったため、使うファイルに `import 'package:ukalab_core/learning.dart';` を追加（名前・挙動は同じ）。

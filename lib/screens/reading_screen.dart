@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ukalab_core/ukalab_core.dart';
 import 'package:ukalab_core/ui.dart';
 
+import '../data/progress_store.dart';
+import '../data/solve_coverage.dart';
 import 'learn_screen.dart';
 import '../widgets/scrollable_center.dart';
 
@@ -56,33 +58,73 @@ class ReadingListScreen extends ConsumerWidget {
       return const ScrollableCenter(child: EmptyState(message: '解説読み物のデータがまだありません。'));
     }
     // 分野の見出し（subjectNames にある分野のみ）。章の並びは読み込み順（データ側で分野ごとに並べる）を保つ。
-    final rows = <Object>[]; // String（見出し）または ChapterReading
+    final rows = <Object>[]; // MapEntry<subjectId, 分野名>（見出し）または ChapterReading
     final seenSubjects = <String>{};
     for (final r in readings) {
       final name = subjectNames[r.subjectId];
-      if (name != null && seenSubjects.add(r.subjectId)) rows.add(name);
+      if (name != null && seenSubjects.add(r.subjectId)) rows.add(MapEntry(r.subjectId, name));
       rows.add(r);
     }
+    // 解いた割合は一覧全体で1回だけ集計する（行ごとには計算しない）。
+    final answered = ref.watch(progressProvider.select((p) => p.answeredQidToCorrect));
+    final coverage = computeSolveCoverage(
+      questions: questions,
+      readings: readings,
+      answered: answered,
+    );
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: rows.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
         final row = rows[i];
-        if (row is String) {
+        if (row is MapEntry<String, String>) {
+          final sub = coverage.bySubject[row.key];
           return Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Semantics(
-              header: true,
-              child: Text(row, style: Theme.of(context).textTheme.titleMedium),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(row.value, style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                ),
+                if (sub != null && sub.total > 0)
+                  Semantics(
+                    label: '解いた割合 ${sub.semanticsLabel}',
+                    excludeSemantics: true,
+                    child: _CoverageChip(
+                      key: ValueKey<String>('subject-coverage-${row.key}'),
+                      coverage: sub,
+                    ),
+                  ),
+              ],
             ),
           );
         }
         final r = row as ChapterReading;
+        final cov = coverage.byReading[r.readingId];
+        final scheme = Theme.of(context).colorScheme;
+        final bg = cov == null ? null : solveCoverageColor(scheme, cov.ratio);
         return Card(
+          key: ValueKey<String>('reading-card-${r.readingId}'),
+          color: bg,
           child: ListTile(
             leading: const Icon(Icons.menu_book_outlined),
             title: Text(r.title),
+            subtitle: cov == null || cov.total == 0
+                ? null
+                : Semantics(
+                    label: '解いた割合 ${cov.semanticsLabel}',
+                    excludeSemantics: true,
+                    child: Text(
+                      '${cov.label}（${cov.percent}%）',
+                      key: ValueKey<String>('reading-coverage-${r.readingId}'),
+                    ),
+                  ),
+            textColor: bg == null ? null : solveCoverageForeground(scheme, bg),
+            iconColor: bg == null ? null : solveCoverageForeground(scheme, bg),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -149,6 +191,34 @@ class ReadingListScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// 分野見出しの横に出す「12/40問」の小さなチップ。背景は解いた割合の濃淡。
+class _CoverageChip extends StatelessWidget {
+  const _CoverageChip({super.key, required this.coverage});
+
+  final SolveCoverage coverage;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final bg = solveCoverageColor(scheme, coverage.ratio);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Text(
+        '${coverage.label}（${coverage.percent}%）',
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall
+            ?.copyWith(color: solveCoverageForeground(scheme, bg)),
+      ),
     );
   }
 }
