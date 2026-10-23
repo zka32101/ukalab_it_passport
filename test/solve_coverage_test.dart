@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ukalab_it_passport/data/app_cert.dart';
 import 'package:ukalab_it_passport/data/progress_store.dart';
 import 'package:ukalab_it_passport/data/solve_coverage.dart';
 import 'package:ukalab_it_passport/screens/reading_screen.dart';
+import 'package:ukalab_core/ui.dart';
 import 'package:ukalab_core/ukalab_core.dart';
 
 Question _q(String qid, String subjectId) => Question(
@@ -40,9 +42,12 @@ class _FakeProgress extends ProgressNotifier {
 }
 
 Widget _app(Map<String, bool> answered, List<Question> qs, List<ChapterReading> rs,
-    {Brightness brightness = Brightness.light}) {
+    {Brightness brightness = Brightness.light, UkalabCert cert = UkalabCert.itPassport}) {
   return ProviderScope(
-    overrides: [progressProvider.overrideWith(() => _FakeProgress(answered))],
+    overrides: [
+      progressProvider.overrideWith(() => _FakeProgress(answered)),
+      appCertProvider.overrideWithValue(cert),
+    ],
     child: MaterialApp(
       theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal, brightness: brightness)),
       home: Scaffold(
@@ -75,32 +80,38 @@ void main() {
     });
   });
 
-  group('solveCoverageColor', () {
+  group('solveCoverageColor（資格色）', () {
     for (final b in Brightness.values) {
-      test('段階が上がるほど primaryContainer に近づく($b)', () {
+      for (final cert in UkalabCert.values) {
+        final certColor = certColorFor(cert, b);
         final scheme = ColorScheme.fromSeed(seedColor: Colors.teal, brightness: b);
-        expect(solveCoverageColor(scheme, 0), scheme.surface);
-        final colors = [for (final r in [0.0, 0.2, 0.5, 0.8, 1.0]) solveCoverageColor(scheme, r)];
-        double dist(Color c) =>
-            (c.r - scheme.primaryContainer.r).abs() + (c.g - scheme.primaryContainer.g).abs() + (c.b - scheme.primaryContainer.b).abs();
-        for (var i = 1; i < colors.length; i++) {
-          expect(dist(colors[i]), lessThan(dist(colors[i - 1])));
-        }
-      });
+        test('${cert.id}/$b: 0%は無色、段階が上がるほど資格色に近づき100%で資格色', () {
+          expect(solveCoverageColor(scheme, certColor, 0), scheme.surface);
+          final colors = [for (final r in [0.0, 0.2, 0.5, 0.8, 1.0]) solveCoverageColor(scheme, certColor, r)];
+          double dist(Color c) =>
+              (c.r - certColor.r).abs() + (c.g - certColor.g).abs() + (c.b - certColor.b).abs();
+          for (var i = 1; i < colors.length; i++) {
+            expect(dist(colors[i]), lessThan(dist(colors[i - 1])));
+          }
+          expect(colors.last.toARGB32(), certColor.toARGB32());
+        });
+
+        test('${cert.id}/$b: 全段階で文字が4.5:1以上', () {
+          for (final r in [0.0, 0.2, 0.5, 0.8, 1.0]) {
+            final bg = solveCoverageColor(scheme, certColor, r);
+            final fg = solveCoverageForeground(scheme, bg);
+            final l1 = bg.computeLuminance();
+            final l2 = fg.computeLuminance();
+            final contrast = (l1 > l2 ? l1 + 0.05 : l2 + 0.05) / (l1 > l2 ? l2 + 0.05 : l1 + 0.05);
+            expect(contrast, greaterThanOrEqualTo(4.5));
+          }
+        });
+      }
     }
 
-    test('文字色は背景とコントラストが取れる', () {
-      for (final b in Brightness.values) {
-        final scheme = ColorScheme.fromSeed(seedColor: Colors.teal, brightness: b);
-        for (final r in [0.0, 0.5, 1.0]) {
-          final bg = solveCoverageColor(scheme, r);
-          final fg = solveCoverageForeground(scheme, bg);
-          final l1 = bg.computeLuminance();
-          final l2 = fg.computeLuminance();
-          final contrast = (l1 > l2 ? l1 + 0.05 : l2 + 0.05) / (l1 > l2 ? l2 + 0.05 : l1 + 0.05);
-          expect(contrast, greaterThan(4.5));
-        }
-      }
+    test('certColorForはライト/ダークで資格のlight/darkを返す', () {
+      expect(certColorFor(kAppCert, Brightness.light), kAppCert.light);
+      expect(certColorFor(kAppCert, Brightness.dark), kAppCert.dark);
     });
   });
 
@@ -153,13 +164,24 @@ void main() {
           tester.widget<Card>(find.byKey(ValueKey<String>('reading-card-$id'))).color!;
       final scheme = Theme.of(tester.element(find.byType(Scaffold))).colorScheme;
       expect(cardColor('none'), scheme.surface);
-      expect(cardColor('half'), isNot(scheme.surface));
+      expect(cardColor('half'), certColorFor(UkalabCert.itPassport, Brightness.light));
+    });
+
+    testWidgets('資格を差し替えると100%の色もその資格色になる', (tester) async {
+      await tester.pumpWidget(_app({'b2': true, 'b3': true}, qs, rs, cert: UkalabCert.boki3));
+      await tester.pump();
+      final c = tester.widget<Card>(find.byKey(const ValueKey<String>('reading-card-half'))).color!;
+      expect(c, UkalabCert.boki3.light);
     });
 
     testWidgets('ダークテーマでも表示できる', (tester) async {
       await tester.pumpWidget(_app({'b0': true}, qs, rs, brightness: Brightness.dark));
       await tester.pump();
       expect(find.text('1/2問（50%）'), findsOneWidget);
+      final c = tester.widget<Card>(find.byKey(const ValueKey<String>('reading-card-none'))).color!;
+      final scheme = Theme.of(tester.element(find.byType(Scaffold))).colorScheme;
+      expect(c, isNot(scheme.surface));
+      expect(c, isNot(UkalabCert.itPassport.light));
     });
   });
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ukalab_core/ukalab_core.dart';
 import 'package:ukalab_core/ui.dart';
 
+import '../data/app_cert.dart';
 import '../data/progress_store.dart';
 import '../data/solve_coverage.dart';
 import 'learn_screen.dart';
@@ -97,6 +98,7 @@ class ReadingListScreen extends ConsumerWidget {
                     child: _CoverageChip(
                       key: ValueKey<String>('subject-coverage-${row.key}'),
                       coverage: sub,
+                      certColor: certColorFor(ref.watch(appCertProvider), Theme.of(context).brightness),
                     ),
                   ),
               ],
@@ -106,7 +108,8 @@ class ReadingListScreen extends ConsumerWidget {
         final r = row as ChapterReading;
         final cov = coverage.byReading[r.readingId];
         final scheme = Theme.of(context).colorScheme;
-        final bg = cov == null ? null : solveCoverageColor(scheme, cov.ratio);
+        final certColor = certColorFor(ref.watch(appCertProvider), scheme.brightness);
+        final bg = cov == null ? null : solveCoverageColor(scheme, certColor, cov.ratio);
         return Card(
           key: ValueKey<String>('reading-card-${r.readingId}'),
           color: bg,
@@ -197,14 +200,15 @@ class ReadingListScreen extends ConsumerWidget {
 
 /// 分野見出しの横に出す「12/40問」の小さなチップ。背景は解いた割合の濃淡。
 class _CoverageChip extends StatelessWidget {
-  const _CoverageChip({super.key, required this.coverage});
+  const _CoverageChip({super.key, required this.coverage, required this.certColor});
 
   final SolveCoverage coverage;
+  final Color certColor;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bg = solveCoverageColor(scheme, coverage.ratio);
+    final bg = solveCoverageColor(scheme, certColor, coverage.ratio);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
