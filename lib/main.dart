@@ -17,6 +17,7 @@ import 'package:ukalab_core/reminder_notification.dart'
     show ReminderNotificationWatcher, reminderNotifierProvider;
 import 'package:ukalab_core/exam_date.dart';
 import 'package:ukalab_core/mock_exam_history.dart';
+import 'data/app_cert.dart';
 import 'data/character_wiring.dart';
 import 'data/exam_repository.dart';
 import 'screens/home_screen.dart';
@@ -89,7 +90,7 @@ void main() async {
   // （決定67〜77）。ショップには通常衣装（ITパスポート、コイン購入）だけを並べる。
   final coinService = CoinService(
     store: SharedPreferencesCoinStore('it_passport'),
-    shop: OutfitCatalog.shopItems([UkalabCert.itPassport]),
+    shop: OutfitCatalog.shopItems([kAppCert]),
   );
   await coinService.load();
 
@@ -209,8 +210,8 @@ class UkalabItPassportApp extends ConsumerWidget {
       title: 'うかラボ ITパスポート',
       debugShowCheckedModeBanner: false,
       locale: const Locale('ja', 'JP'),
-      theme: _withFont(UkalabTheme.light(field: UkalabField.it, cert: UkalabCert.itPassport)),
-      darkTheme: _withFont(UkalabTheme.dark(field: UkalabField.it, cert: UkalabCert.itPassport)),
+      theme: _withFont(UkalabTheme.light(field: UkalabField.it, cert: kAppCert)),
+      darkTheme: _withFont(UkalabTheme.dark(field: UkalabField.it, cert: kAppCert)),
       home: const _RootPage(),
     );
   }

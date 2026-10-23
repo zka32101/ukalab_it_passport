@@ -33,28 +33,33 @@ int solveCoverageStage(double ratio) {
   return 3;
 }
 
-/// 段階ごとの [ColorScheme.primaryContainer] の混ぜ具合（0%は無色に近く、100%で最も濃い）。
+/// 段階ごとの資格色の混ぜ具合（0%は無色、100%で資格色そのまま＝最も濃い）。
 const _stageAlpha = <double>[0.0, 0.25, 0.5, 0.75, 1.0];
 
-/// 段階に応じた背景色。[ColorScheme.surface] に [ColorScheme.primaryContainer] を重ねて（文字との対比が両テーマで保たれる）導出する（ライト/ダーク共通）。
-Color solveCoverageColor(ColorScheme scheme, double ratio) {
+/// 段階に応じた背景色。[ColorScheme.surface] に [certColor]（資格色）を重ねて導出する（ライト/ダーク共通）。
+/// [certColor] は `certColorFor(cert, brightness)` で取得する。
+Color solveCoverageColor(ColorScheme scheme, Color certColor, double ratio) {
   final alpha = _stageAlpha[solveCoverageStage(ratio)];
-  return Color.alphaBlend(scheme.primaryContainer.withValues(alpha: alpha), scheme.surface);
+  return Color.alphaBlend(certColor.withValues(alpha: alpha), scheme.surface);
 }
 
-/// [background] の上で読みやすい文字色（onSurface と surface のうちコントラストが高い方）。
-Color solveCoverageForeground(ColorScheme scheme, Color background) {
-  double contrast(Color a, Color b) {
-    final la = a.computeLuminance();
-    final lb = b.computeLuminance();
-    final hi = la > lb ? la : lb;
-    final lo = la > lb ? lb : la;
-    return (hi + 0.05) / (lo + 0.05);
-  }
+double _contrast(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
+}
 
-  return contrast(scheme.onSurface, background) >= contrast(scheme.surface, background)
-      ? scheme.onSurface
-      : scheme.surface;
+/// [background] の上で読みやすい文字色。テーマの onSurface / surface で 4.5:1 を満たせばそれを使い、
+/// 満たせない中間の濃さでは黒か白のうちコントラストが高い方にする。
+Color solveCoverageForeground(ColorScheme scheme, Color background) {
+  for (final c in [scheme.onSurface, scheme.surface]) {
+    if (_contrast(c, background) >= 4.5) return c;
+  }
+  return _contrast(Colors.black, background) >= _contrast(Colors.white, background)
+      ? Colors.black
+      : Colors.white;
 }
 
 /// 分野（subjectId）ごと・読み物の章ごとの解いた割合。
