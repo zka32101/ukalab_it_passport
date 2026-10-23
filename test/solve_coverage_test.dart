@@ -133,14 +133,16 @@ void main() {
     ];
 
     testWidgets('0%・途中・100%を数値で併記する', (tester) async {
-      final handle = tester.ensureSemantics();
       await tester.pumpWidget(_app({'b0': true, 'b1': false, 'b2': true}, qs, rs));
       await tester.pump();
       expect(find.text('2/2問（100%）'), findsOneWidget);
       expect(find.text('1/2問（50%）'), findsOneWidget);
       expect(find.text('3/4問（75%）'), findsOneWidget); // 分野見出し
-      expect(find.bySemanticsLabel('解いた割合 2問中2問を解答済み、100%'), findsOneWidget);
-      handle.dispose();
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is Semantics && w.properties.label == '解いた割合 2問中2問を解答済み、100%'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('0%は数値0/Nで表示し、100%のカードは0%より濃い', (tester) async {
