@@ -183,10 +183,10 @@ const kAppFontFamily = 'BIZUDPGothic';
 
 /// 起動画面（ネイティブ起動画面と同じブランド色・アイコン）。
 const kLaunchBackgroundColor = Color(0xFF4875DE);
-const kLaunchIconAsset = 'assets/icon/app_icon.png';
+const kLaunchIconAsset = 'assets/icon/app_icon_foreground.png';
 
-Widget buildStartupSplash() => const StartupSplash(
-      appIconAsset: kLaunchIconAsset,
+Widget buildStartupSplash() => const UkalabStartupSplash(
+      iconAsset: kLaunchIconAsset,
       backgroundColor: kLaunchBackgroundColor,
     );
 
