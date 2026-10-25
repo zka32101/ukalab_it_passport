@@ -5,8 +5,8 @@ import 'package:ukalab_it_passport/data/app_cert.dart';
 import 'package:ukalab_it_passport/data/progress_store.dart';
 import 'package:ukalab_it_passport/data/solve_coverage.dart';
 import 'package:ukalab_it_passport/screens/reading_screen.dart';
-import 'package:ukalab_core/ui.dart';
-import 'package:ukalab_core/ukalab_core.dart';
+import 'package:ukalab_core/ui.dart' hide solveCoverageForeground;
+import 'package:ukalab_core/ukalab_core.dart' hide SolveCoverage;
 
 Question _q(String qid, String subjectId) => Question(
       qid: qid,
