@@ -37,13 +37,22 @@ MascotStage oshiStageFor({
 /// ホームの「推し」カード。共通キットの [UkalabOshiCard] に、ITパスポートの成長段階・連続日数・
 /// 試験日を渡す。推しの選択・着替え・合格報告・表示切替・コイン表示はキット側。
 class OshiCard extends ConsumerWidget {
-  const OshiCard({super.key, required this.totalQuestions, this.examDate});
+  const OshiCard({
+    super.key,
+    required this.totalQuestions,
+    this.examDate,
+    this.onLockedTap,
+  });
 
   /// 出題範囲の全問題数（網羅率の分母）。
   final int totalQuestions;
 
   /// 試験日（設定した人だけ）。
   final DateTime? examDate;
+
+  /// ロック中の資格専用キャラのプレビューの「プレミアムを見る」から呼ばれる（購入欄への誘導）。
+  /// null ならボタンは出ない。
+  final VoidCallback? onLockedTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,6 +71,7 @@ class OshiCard extends ConsumerWidget {
           ),
           appId: 'it_passport',
           examDate: examDate,
+          onLockedTap: onLockedTap,
           streakDays: progress.streakDays,
           studiedToday: progress.lastStudyDay == studyDayKey(now),
         ),
