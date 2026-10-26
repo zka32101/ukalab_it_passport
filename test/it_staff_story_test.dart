@@ -39,8 +39,8 @@ void main() {
   });
 
   group('データ検証', () {
-    test('シナリオは7本で、最初の2本だけ無料', () {
-      expect(_scenarios.length, 7);
+    test('シナリオは10本で、最初の2本だけ無料', () {
+      expect(_scenarios.length, 10);
       expect(_scenarios.where((s) => s.isFree).length, 2);
       expect(_scenarios.take(2).every((s) => s.isFree), isTrue);
       expect(_scenarios.skip(2).every((s) => !s.isFree), isTrue);
@@ -91,7 +91,7 @@ void main() {
 
     testWidgets('無料: プレミアム限定は案内のSnackBarだけで、画面に入れない', (tester) async {
       await _pumpList(tester, premium: false);
-      expect(find.byIcon(Icons.lock_outline), findsNWidgets(5));
+      expect(find.byIcon(Icons.lock_outline), findsNWidgets(8));
       await tester.tap(find.text(_scenarios[2].story.title));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
