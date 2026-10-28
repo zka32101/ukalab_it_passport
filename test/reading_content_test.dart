@@ -11,9 +11,9 @@ import 'package:ukalab_it_passport/screens/reading_screen.dart';
 /// 解説読み物（assets/experience）の内容検証。
 ///
 /// 第1弾の拡充（docs/reading_expansion_plan.md）以降、章が増えても
-/// 必須項目・ID重複・関連ID（用語・問題）の実在・AI下書きの印が崩れないことを確かめる。
+/// 必須項目・ID重複・関連ID（用語・問題）の実在・AI下書き由来の表記（ai-draft の印は外し済み）が崩れないことを確かめる。
 
-/// 拡充前から在る分野ごとの概要（AI下書きの印は付けていない）。
+/// 拡充前から在る分野ごとの概要（もともとAI下書きの印は付けていない）。
 const _overviewIds = {'reading-business', 'reading-technology', 'reading-security_ethics'};
 
 /// 読み物の本文に入れてはいけない表現（保証・断定・権威づけ）。
@@ -85,12 +85,15 @@ void main() {
     }
   });
 
-  test('すべて source=original。拡充した章はAI下書きの印（sourceRef に ai-draft）がある', () {
+  test('すべて source=original。拡充した章はAI下書きの印（sourceRef の ai-draft）を外し、由来だけ残している', () {
     for (final r in _data.chapterReadings) {
       expect(r.source, QuestionSource.original, reason: r.readingId);
     }
     for (final r in _chapters) {
-      expect(r.sourceRef, contains('ai-draft'), reason: r.readingId);
+      // 体験コンテンツのため専門家確認は不要と判断し、印を外した。確認はしていないので「確認済み」とは書かない。
+      expect(r.sourceRef, isNot(contains('ai-draft')), reason: r.readingId);
+      expect(r.sourceRef, contains('AI下書き由来'), reason: r.readingId);
+      expect(r.sourceRef, isNot(contains('専門家確認済み')), reason: r.readingId);
     }
   });
 

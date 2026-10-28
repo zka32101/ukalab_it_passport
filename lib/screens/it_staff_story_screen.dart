@@ -67,11 +67,13 @@ class _ItStaffStoryListScreenState extends ConsumerState<ItStaffStoryListScreen>
                 '架空の会社のIT担当になって、月ごとの出来事にどう判断するかを選びます。選んだあとに理由の解説が出ます。',
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 4),
-              Text(
-                kItStaffStoryDraftNotice,
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-              ),
+              if (scenarios.any((s) => s.isAiDraft)) ...[
+                const SizedBox(height: 4),
+                Text(
+                  kItStaffStoryDraftNotice,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
+              ],
               const SizedBox(height: 12),
               for (final s in scenarios) ...[
                 Card(

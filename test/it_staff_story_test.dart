@@ -46,7 +46,7 @@ void main() {
       expect(_scenarios.skip(2).every((s) => !s.isFree), isTrue);
     });
 
-    test('品質ゲートに通る(AI下書きの印・自作の出典・禁止表現なし・用語の参照先)', () {
+    test('品質ゲートに通る(自作の出典・禁止表現なし・用語の参照先)', () {
       final issues = validateItStaffScenarios(
         _scenarios,
         exam: _data.exam,
@@ -54,38 +54,42 @@ void main() {
       );
       expect(issues, isEmpty);
       for (final s in _scenarios) {
-        expect(s.contentStatus, 'ai-draft');
+        // 体験コンテンツのため専門家確認は不要と判断し、印を外した。由来は sourceRef に残す。
+        expect(s.contentStatus, isEmpty, reason: s.scenarioId);
+        expect(s.isAiDraft, isFalse, reason: s.scenarioId);
+        expect(s.story.sourceRef, contains('AI下書き由来'), reason: s.scenarioId);
+        expect(s.story.sourceRef, isNot(contains('専門家確認済み')), reason: s.scenarioId);
         expect(s.story.sourceRef, contains('自作'));
         expect(s.story.chapters.length, 5);
       }
     });
 
-    test('禁止表現や AI 下書きの欠落を検出できる', () {
+    test('禁止表現・用語の不備・誤った確認済み表記・未知の印を検出できる', () {
       final bad = parseItStaffScenarios(
         '{"scenarioId":"x","examId":"it_passport","title":"過去問で学ぶ","description":"d",'
         '"chapters":[{"chapterId":"a","situation":"s","choices":[{"choiceId":"1","text":"t","isRecommended":true,"feedback":"f"},{"choiceId":"2","text":"u","isRecommended":false,"feedback":"g"}]},'
         '{"chapterId":"b","situation":"s","choices":[{"choiceId":"1","text":"t","isRecommended":true,"feedback":"f"},{"choiceId":"2","text":"u","isRecommended":false,"feedback":"g"}]}],'
-        '"source":"original","sourceRef":"自作","contentVer":"1","termIds":["nope"]}',
+        '"source":"original","sourceRef":"自作(専門家確認済み)","contentVer":"1","contentStatus":"reviewed","termIds":["nope"]}',
       );
       final codes = validateItStaffScenarios(
         bad.scenarios,
         exam: _data.exam,
         termIds: _data.terms.map((t) => t.termId),
       ).map((i) => i.code).toSet();
-      expect(codes, containsAll(['no-ai-draft', 'forbidden-word', 'unknown-term']));
+      expect(codes, containsAll(['forbidden-word', 'unknown-term', 'false-confirmed', 'unknown-content-status']));
     });
   });
 
   group('一覧画面', () {
-    testWidgets('無料: 無料シナリオは開け、AI下書きの表示が出る', (tester) async {
+    testWidgets('無料: 無料シナリオは開け、AI下書きの表示は出ない(印を外したため)', (tester) async {
       await _pumpList(tester, premium: false);
-      expect(find.text(kItStaffStoryDraftNotice), findsOneWidget);
+      expect(find.text(kItStaffStoryDraftNotice), findsNothing);
       await tester.tap(find.text(_scenarios[0].story.title));
       for (var i = 0; i < 10; i++) {
         await tester.pump(const Duration(milliseconds: 50));
       }
       expect(find.byType(ItStaffStoryPlayScreen), findsOneWidget);
-      expect(find.text(kItStaffStoryDraftNotice), findsOneWidget);
+      expect(find.text(kItStaffStoryDraftNotice), findsNothing);
       expect(find.text('第1章 / 全5章'), findsOneWidget);
     });
 
