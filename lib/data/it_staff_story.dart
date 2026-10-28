@@ -6,10 +6,11 @@ import 'package:ukalab_core/ukalab_core.dart';
 /// 「会社のIT担当1年目」(ストーリー型の体験。ukalab_boki の会社経営モード・
 /// ukalab_g_kentei のAIプロジェクト経営モードと同じ構造)のデータ。
 
-/// 画面に出す、AI下書きであることの表示。
+/// 画面に出す、AI下書きであることの表示。`contentStatus` が `ai-draft` のシナリオにだけ出す。
+/// 現在の10本は体験コンテンツのため専門家確認は不要と判断し、印を外した(2026-10-28)。
 const String kItStaffStoryDraftNotice = '学習用の架空シナリオ(AI下書き・専門確認前)';
 
-/// データに付ける AI 下書きの印(`contentStatus`)。
+/// データに付ける AI 下書きの印(`contentStatus`)。印がない(キーなし)のが通常の状態。
 const String kItStaffContentStatusAiDraft = 'ai-draft';
 
 /// 無料で遊べるシナリオ(最初の2本)。残りはプレミアム限定。
@@ -33,7 +34,7 @@ class ItStaffScenario {
 
   final StoryScenario story;
 
-  /// 'ai-draft' など。
+  /// 'ai-draft' など。印がなければ空文字。
   final String contentStatus;
 
   /// 既存の用語集の termId。画面の「関連用語」から用語カードを開く。
@@ -80,7 +81,7 @@ ParsedItStaffScenarios parseItStaffScenarios(String text) {
   return ParsedItStaffScenarios(scenarios, issues);
 }
 
-/// 配信前の品質ゲート。コアの検査に加えて、AI下書きの印・出典・禁止表現・関連用語の参照先を確かめる。
+/// 配信前の品質ゲート。コアの検査に加えて、AI下書きの印の値・出典・禁止表現・関連用語の参照先を確かめる。
 List<ContentIssue> validateItStaffScenarios(
   List<ItStaffScenario> items, {
   required ExamConfig exam,
@@ -93,7 +94,14 @@ List<ContentIssue> validateItStaffScenarios(
   for (final item in items) {
     final s = item.story;
     void add(String code, String message) => issues.add(ContentIssue(s.scenarioId, code, message));
-    if (!item.isAiDraft) add('no-ai-draft', 'contentStatus が ai-draft ではありません');
+    // 印(contentStatus)は任意。付けるなら既知の値(ai-draft)だけにして、表記ゆれを防ぐ。
+    if (item.contentStatus.isNotEmpty && !item.isAiDraft) {
+      add('unknown-content-status', 'contentStatus は ai-draft 以外を使いません: ${item.contentStatus}');
+    }
+    // 由来は残すが、確認していないものを「専門家確認済み」と書かない。
+    if (s.sourceRef.contains('専門家確認済み')) {
+      add('false-confirmed', 'sourceRef に「専門家確認済み」と書かないでください(確認はしていません)');
+    }
     if (s.source != QuestionSource.original) add('not-original', 'source は original(自作)である必要があります');
     if (!s.sourceRef.contains('自作')) add('no-self-made', 'sourceRef に自作である旨がありません');
     if (item.termIds.isEmpty) add('no-terms', '関連用語(termIds)がありません');
