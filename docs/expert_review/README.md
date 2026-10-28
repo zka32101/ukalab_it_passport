@@ -10,3 +10,7 @@
 - 判定が出た問題だけ別PRで反映（`contentVer` 更新）。「OK」のみタグを外す。「削除」は `disabled: true` か行削除。
 - 記録するのは確認日（年月）と確認者区分のみ。氏名・所属・連絡先は記録しない。
 - CSV の再生成: `python3 <core>/tools/export_review_csv.py <jsonl> --tag ai-draft -o docs/expert_review/review_ai_draft.csv`
+
+## 確認済み
+- 確認済み(2026-10-28): 問題データの ai-draft 409問（上記271問＋追加分）について専門家の確認OKを受け、`ai-draft` タグを外し `sourceRef` を「AI下書き・専門家確認済み」に更新（`contentVer` は 2026.10.17）。確認者区分のみ記録し、氏名等は記録しない。
+- 読み物（`reading_it_passport.jsonl`）と「IT担当1年目」シナリオ（`contentStatus: ai-draft`）は問題タグではないため今回の対象外（未反映）。
